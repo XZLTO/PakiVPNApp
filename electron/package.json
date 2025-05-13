@@ -1,0 +1,61 @@
+{
+  "name": "pakivpn",
+  "productName": "PakiVPN",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "cross-env DEV=true electron-forge start",
+    "package": "electron-forge package",
+    "service": "node ./src/",
+    "make": "electron-forge make --platform=linux",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
+  },
+  "keywords": [],
+  "author": {
+    "name": "XZLTO",
+    "email": "66406449+XZLTO@users.noreply.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/XZLTO/PakiVPNDesktop.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.0",
+    "@electron-forge/maker-deb": "^7.8.1",
+    "@electron-forge/maker-dmg": "^7.8.1",
+    "@electron-forge/maker-rpm": "^7.8.1",
+    "@electron-forge/maker-squirrel": "^7.8.1",
+    "@electron-forge/maker-zip": "^7.8.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.8.0",
+    "@electron-forge/plugin-fuses": "^7.8.0",
+    "@electron-forge/plugin-webpack": "^7.8.0",
+    "@electron/fuses": "^1.8.0",
+    "@types/glob": "^8.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.11.0",
+    "electron": "36.0.1",
+    "eslint": "^8.57.1",
+    "eslint-plugin-import": "^2.31.0",
+    "fork-ts-checker-webpack-plugin": "^7.3.0",
+    "node-loader": "^2.1.0",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "~4.5.4"
+  },
+  "dependencies": {
+    "@electron-forge/publisher-github": "^7.8.1",
+    "@types/node": "^22.15.17",
+    "electron-squirrel-startup": "^1.0.1",
+    "electron-store": "^8.2.0",
+    "node-port-check": "^2.0.1",
+    "sudo-prompt": "^9.2.1",
+    "update-electron-app": "^3.1.1"
+  }
+}
