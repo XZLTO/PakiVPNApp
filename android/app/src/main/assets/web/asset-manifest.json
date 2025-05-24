@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "./static/css/main.e6c13ad2.css",
-    "main.js": "./static/js/main.b54469c9.js",
+    "main.js": "./static/js/main.e488c1af.js",
     "static/js/453.ed3810f9.chunk.js": "./static/js/453.ed3810f9.chunk.js",
     "static/media/LOGO_PAKI_TEXT.png": "./static/media/LOGO_PAKI_TEXT.09c9e0e27a90641e45df.png",
     "index.html": "./index.html",
     "main.e6c13ad2.css.map": "./static/css/main.e6c13ad2.css.map",
-    "main.b54469c9.js.map": "./static/js/main.b54469c9.js.map",
+    "main.e488c1af.js.map": "./static/js/main.e488c1af.js.map",
     "453.ed3810f9.chunk.js.map": "./static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.b54469c9.js"
+    "static/js/main.e488c1af.js"
   ]
 }

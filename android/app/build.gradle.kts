@@ -40,13 +40,7 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
-    buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
 }
-
 dependencies {
 
     implementation(fileTree("libs"))
@@ -94,8 +88,6 @@ dependencies {
     ksp("com.github.MatrixDev.Roomigrant:RoomigrantCompiler:0.3.4")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
-
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
 
 

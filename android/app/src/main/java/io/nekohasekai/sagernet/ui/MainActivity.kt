@@ -183,7 +183,6 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-
     fun refreshNavMenu(clashApi: Boolean) {
         if (::navigation.isInitialized) {
             navigation.menu.findItem(R.id.nav_traffic)?.isVisible = clashApi
