@@ -31,6 +31,7 @@ import moe.matsuri.nb4a.NativeInterface
 import moe.matsuri.nb4a.utils.JavaUtil
 import moe.matsuri.nb4a.utils.cleanWebview
 import java.io.File
+import java.sql.Struct
 import androidx.work.Configuration as WorkConfiguration
 
 class SagerNet : Application(),
@@ -187,12 +188,13 @@ class SagerNet : Application(),
         }
 
         fun startService() = ContextCompat.startForegroundService(
-            application, Intent(application, SagerConnection.serviceClass)
+            application, Intent(application, SagerConnection.serviceClass).apply { putExtra("config",DataStore.config) }
         )
 
         fun reloadService() =
             application.sendBroadcast(Intent(Action.RELOAD).setPackage(application.packageName))
-
+        fun setConfig(config:String) =
+            application.sendBroadcast(Intent(Action.SETCONFIG).putExtra("config",config).setPackage(application.packageName))
         fun stopService() =
             application.sendBroadcast(Intent(Action.CLOSE).setPackage(application.packageName))
 

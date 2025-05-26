@@ -28,6 +28,7 @@ import libcore.Libcore
 import moe.matsuri.nb4a.Protocols
 import moe.matsuri.nb4a.proxy.config.ConfigBean
 import moe.matsuri.nb4a.utils.Util
+import java.net.Proxy
 import java.net.UnknownHostException
 
 class BaseService {
@@ -49,6 +50,7 @@ class BaseService {
         var state = State.Stopped
         var proxy: ProxyInstance? = null
         var notification: ServiceNotification? = null
+        var profile: ProxyEntity? = null
 
         val receiver = broadcastReceiver { ctx, intent ->
             when (intent.action) {
@@ -182,7 +184,7 @@ class BaseService {
                 stopRunner(false, (this as Context).getString(R.string.profile_empty))
             }
             if (canReloadSelector()) {
-                val ent = getProile()
+                val ent = data.profile
                 val tag = data.proxy!!.config.profileTagMap[ent?.id] ?: ""
                 if (tag.isNotBlank() && ent != null) {
                     // select from GUI
@@ -202,7 +204,7 @@ class BaseService {
 
         fun canReloadSelector(): Boolean {
             if ((data.proxy?.config?.selectorGroupId ?: -1L) < 0) return false
-            val ent = getProile() ?: return false
+            val ent = data.profile ?: return false
             val tmpBox = ProxyInstance(ent)
             tmpBox.buildConfigTmp()
             if (tmpBox.lastSelectorGroupId == data.proxy?.lastSelectorGroupId) {
@@ -309,32 +311,44 @@ class BaseService {
             }
         }
 
-        fun getProile():ProxyEntity?
-        {
-            this as Context
-            val preferences = getSharedPreferences("sing-box", Context.MODE_PRIVATE)
-            if(preferences.getString("config", "") == "") return null
-
-            return ProxyEntity(groupId = 1).apply {
-                id = 0
-                putBean(ConfigBean().apply {
-                    applyDefaultValues()
-                    type = preferences.getInt("type",0)
-                    name = preferences.getString("name", "")
-                    config = preferences.getString("config", "")
-                })
-                userOrder = 1
-            }
-        }
-
         @SuppressLint("UnspecifiedRegisterReceiverFlag")
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             DataStore.baseService = this
 
             val data = data
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
+
             this as Context
-            val profile = getProile();
+
+            val preferences = getSharedPreferences("sing-box", Context.MODE_PRIVATE)
+
+            data.profile = ProxyEntity(groupId = 1).apply {
+                id = 0
+                putBean(ConfigBean().apply {
+                    applyDefaultValues()
+                    type = preferences.getInt("type",0)
+                    name = preferences.getString("name", "")
+                    if (intent != null) {
+                        config = intent.getStringExtra("config")
+                    }
+                })
+                userOrder = 1
+            }
+
+            preferences.registerOnSharedPreferenceChangeListener { _, key ->
+                data.profile = ProxyEntity(groupId = 1).apply {
+                    id = 0
+                    putBean(ConfigBean().apply {
+                        applyDefaultValues()
+                        type = preferences.getInt("type",0)
+                        name = preferences.getString("name", "")
+                        config = preferences.getString("config", "")
+                    })
+                    userOrder = 1
+                }
+            }
+
+            val profile = data.profile;
 
             if (profile == null) { // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
                 data.notification = createNotification("")

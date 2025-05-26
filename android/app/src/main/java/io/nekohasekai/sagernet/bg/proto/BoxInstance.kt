@@ -47,7 +47,7 @@ abstract class BoxInstance(
     protected open fun buildConfig() {
         config = buildConfig(profile)
         Log.d("BoxInstance","BuildedConfig")
-        Log.d("BoxInstance", "Конфиг: "+DataStore.conig);
+        Log.d("BoxInstance", "Конфиг: "+DataStore.config);
     }
 
     protected open suspend fun loadConfig() {

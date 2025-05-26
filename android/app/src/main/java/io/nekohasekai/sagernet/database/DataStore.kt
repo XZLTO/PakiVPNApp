@@ -35,12 +35,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var currentProfile by configurationStore.long(Key.PROFILE_CURRENT)
 
     var selectedProxy by configurationStore.long(Key.PROFILE_ID)
-    var selectedGroup by configurationStore.long(Key.PROFILE_GROUP) { currentGroupId() } // "ungrouped" group id = 1
+    var selectedGroup by configurationStore.long(Key.PROFILE_GROUP) { currentGroupId() } // "ungrouped" group id = 1]
 
-    @Volatile
-    var name = "";
-    @Volatile
-    var conig = "";
+    var config by profileCacheStore.string(Key.SERVER_CONFIG)
 
     // only in bg process
     var vpnService: VpnService? = null

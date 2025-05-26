@@ -70,9 +70,8 @@ class MainActivity : AppCompatActivity(),
 
         bridge.subscribe("start"){
                 nativeBridge, args ->
-            val config = args[0];
-            Log.w("TEST", config.toString())
-            setConfig("PakiVPN",config.toString(),0);
+            val config = args[0].toString();
+            DataStore.config = config
             if (!DataStore.serviceState.canStop) connect.launch(
                 null
             )
@@ -95,17 +94,7 @@ class MainActivity : AppCompatActivity(),
         setContentView(webView)
 
         try {
-            val htmlContent = assets.open("web/index.html")
-                .bufferedReader()
-                .use { it.readText() }
-
-            webView.loadDataWithBaseURL(
-                "file:///android_asset/web/index.html",  // Базовый URL для корректных относительных путей
-                htmlContent,
-                "text/html",
-                "UTF-8",
-                null
-            )
+            webView.loadUrl("https://pakivpn.github.io")
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(this, "Ошибка загрузки HTML", Toast.LENGTH_SHORT).show()
@@ -204,13 +193,17 @@ class MainActivity : AppCompatActivity(),
         return connection.service!!.urlTest()
     }
 
-    fun setConfig(name:String , config:String, type: Int) =
+    fun setConfig(name:String , config:String, type: Int)
+        {
+            DataStore.config = config
             getSharedPreferences("sing-box", Context.MODE_PRIVATE)
-                .edit() {
+                .edit(commit = true) {
                     putString("name", name)
-                    putString("config",config)
-                    putInt("type",type)
-                }.apply{}
+                        .putString("config", config)
+                        .putInt("type", type)
+                }
+        }
+
 
 
 

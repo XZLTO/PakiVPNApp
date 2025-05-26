@@ -91,34 +91,34 @@ dependencies {
 }
 
 
-val isFormNPM = project.hasProperty("formNPM")
-
-if (!isFormNPM) {
-    tasks.register("webBuild") {
-        group = "build"
-        doLast {
-            val rootDir = file("../../")
-            exec {
-                workingDir = rootDir
-                if (System.getProperty("os.name").lowercase(Locale.getDefault()).contains("win")) {
-                    commandLine("cmd", "/c", "npm", "run", "web:build")
-                } else {
-                    commandLine("npx", "run", "web:build")
-                }
-            }
-
-            exec {
-                workingDir = rootDir
-                if (System.getProperty("os.name").lowercase(Locale.getDefault()).contains("win")) {
-                    commandLine("cmd", "/c", "npm", "run", "web:copyAndroid")
-                } else {
-                    commandLine("npm", "run", "web:copyAndroid")
-                }
-            }
-        }
-    }
-
-    tasks.named("preBuild") {
-        dependsOn("webBuild")
-    }
-}
+//val isFormNPM = project.hasProperty("formNPM")
+//
+//if (!isFormNPM) {
+//    tasks.register("webBuild") {
+//        group = "build"
+//        doLast {
+//            val rootDir = file("../../")
+//            exec {
+//                workingDir = rootDir
+//                if (System.getProperty("os.name").lowercase(Locale.getDefault()).contains("win")) {
+//                    commandLine("cmd", "/c", "npm", "run", "web:build")
+//                } else {
+//                    commandLine("npx", "run", "web:build")
+//                }
+//            }
+//
+//            exec {
+//                workingDir = rootDir
+//                if (System.getProperty("os.name").lowercase(Locale.getDefault()).contains("win")) {
+//                    commandLine("cmd", "/c", "npm", "run", "web:copyAndroid")
+//                } else {
+//                    commandLine("npm", "run", "web:copyAndroid")
+//                }
+//            }
+//        }
+//    }
+//
+//    tasks.named("preBuild") {
+//        dependsOn("webBuild")
+//    }
+//}
