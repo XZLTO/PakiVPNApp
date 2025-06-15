@@ -10,6 +10,7 @@ import { RouterProvider } from './router/routerContext';
 import { PageRouter } from './router/pageRouter';
 import AuthPage from './pages/AuthPage';
 import { NotificationProvider, useNotification } from './contexts/notification';
+import { VpnProvider } from './contexts/vpn';
 
 const bridge = NativeBridge.getInstance()
 bridge.ping();
@@ -40,7 +41,7 @@ const Main: React.FC = () => {
 
   return (
     <App>
-      <PageRouter pages={pages} defaultPageId="auth"/>
+      <PageRouter pages={pages} defaultPageId="auth" />
     </App>
   )
 }
@@ -58,7 +59,9 @@ root.render(
         algorithm: theme.darkAlgorithm,
       }}>
         <NotificationProvider>
-          <Main/>
+          <VpnProvider>
+            <Main />
+          </VpnProvider>
         </NotificationProvider>
       </ConfigProvider>
     </RouterProvider>

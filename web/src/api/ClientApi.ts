@@ -61,6 +61,8 @@ class ApiClient {
         }
 
         const url = `${this.baseUrl}${endpoint}`;
+
+        console.log("Api request:"+url)
         
         const headers = new Headers(options.headers || {});
         if (this.token) {

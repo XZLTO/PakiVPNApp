@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Tag, Modal, ConfigProvider, Layout, Typography, Space, Image, List, notification } from 'antd';
+import { Button, Card, Tag, Modal, ConfigProvider, Layout, Typography, Space, Image, List, notification, Drawer } from 'antd';
 import { ThunderboltOutlined, DisconnectOutlined, GlobalOutlined } from '@ant-design/icons';
 import styled, { keyframes } from 'styled-components';
 import logo from "./LOGO_PAKI_TEXT.png";
@@ -11,6 +11,7 @@ import { codes_ru } from '../types/codes';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useNotification } from '../contexts/notification';
 import { useNavigation } from '../router/routerContext';
+import { useVpn } from '../contexts/vpn';
 
 const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
@@ -72,79 +73,61 @@ const StyledButton = styled(Button)`
 const MainPage: React.FC = () => {
   const notify = useNotification();
   const { navigateTo } = useNavigation();
-
-  const apiClient = ApiClient.getInstance(Domain)
-  const [selectedServer, setSelectedServer] = useState<VPNLocation | null>(null);
-  const [servers, setServers] = useState<VPNLocation[]>([])
+  const {
+    selectedServer,
+    servers,
+    logs,
+    duration,
+    status,
+    connect,
+    disconnect,
+    isActive,
+    canToggle,
+    refreshServers,
+    setServer
+  } = useVpn();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [status, setStatus] = useState<VpnStatus>("Stopped");
 
   const [version, setVersion] = useState<string>("0.0.0")
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (status == "Connected") {
-      interval = setInterval(() => {
-        setDuration(prev => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [status]);
-
-  useEffect(() => {
-    window.NativeBridge.send("status");
-    const off = window.NativeBridge.on("status", (status, msg) => {
-      setStatus(status)
-      if (msg) notify.error({
-        message: "Ошибка sing-box",
-        description: msg
-      })
-    })
-
     window.NativeBridge.getVersion().then((value) => {
       setVersion(value || "0.0.0")
     })
 
-    updateList()
-    return off;
-  }, [setStatus]);
 
-  const updateList = async () => {
-    try {
-      setServers(await apiClient.getLocations())
-      const id = await window.NativeBridge.get("selectedServer") as number;
-      if (id && servers[id]) {
-        setSelectedServer(servers[id])
-      }
-    }
-    catch (ex: any) {
-      notify.error({
-        message: "Ошибка",
-        description: ex.toString()
-      })
-      navigateTo("auth")
-    }
-  }
+  },[]);
 
   const handleConnect = async () => {
-    if (status === "Idle" || status === "Stopped") {
-      try {
-        const { config_id } = await apiClient.generateConfig(selectedServer ? selectedServer.id : 0);
-        const config = await apiClient.getConfiguration(config_id);
-        setDuration(0)
-        window.NativeBridge.send("start", JSON.stringify(config));
-      } catch (ex: any) {
-        notify.error({
-          message: "Ошибка",
-          description: ex.toString()
-        });
-        if (selectedServer != null) navigateTo("auth");
-      }
-    } else if (status === "Connected") {
-      window.NativeBridge.send("stop");
+    if (isActive()) {
+      disconnect()
+    } else {
+      connect()
     }
+  };
+
+  const [open, setOpen] = useState(false);
+  const showDrawer = () => {
+    setOpen(true);
+  };
+
+  const onClose = () => {
+    setOpen(false);
+  };
+
+  const copyLogsToClipboard = () => {
+    const logsText = logs
+      .map(log => `${log}`)
+      .join('\n');
+    
+    navigator.clipboard.writeText(logsText)
+      .then(() => {
+        notify.success({message:'Логи скопированы в буфер обмена'});
+      })
+      .catch(err => {
+        notify.error({message:'Не удалось скопировать логи'});
+      });
   };
 
   const formatTime = (seconds: number) => {
@@ -156,8 +139,27 @@ const MainPage: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header style={{ background: "transparent", padding: '16px' }}>
-        <Image width={80} src={logo} preview={false} />
+        <Image onClick={showDrawer} width={80} src={logo} preview={false} />
       </Header>
+
+      <Drawer
+        title="Системные логи"
+        placement={"right"}
+        width={500}
+        onClose={onClose}
+        open={open}
+        extra={
+          <Button type="primary" onClick={copyLogsToClipboard}>
+            Скопировать логи
+          </Button>
+        }
+      >
+        <pre>
+          {logs.map((log, index) => (
+            <div key={index}>{log}</div>
+          ))}
+        </pre>
+      </Drawer>
 
       <Content style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {
@@ -178,8 +180,8 @@ const MainPage: React.FC = () => {
             </ConnectionStatus>}
           <StyledButton
             type="primary"
-            danger={status == "Connected"}
-            disabled={status == "Connecting" || status == "Stopping"}
+            danger={isActive()}
+            disabled={!canToggle()}
             onClick={handleConnect}
           >
             <Text>{status}</Text>
@@ -188,12 +190,12 @@ const MainPage: React.FC = () => {
 
         <Button
           style={{ marginBottom: 12 }}
-          onClick={async () => {
-            if (status == "Connected" || status == "Connecting")
+          onClick={() => {
+            if (isActive())
               return notify.error({
                 message: "Сначало остановите VPN!"
               })
-            await updateList()
+            refreshServers()
             setIsModalOpen(true)
           }}
           icon={<GlobalOutlined />}
@@ -216,8 +218,7 @@ const MainPage: React.FC = () => {
                 hoverable
                 style={{ padding: 2, marginBottom: 8, position: 'relative' }}
                 onClick={() => {
-                  window.NativeBridge.set("selectedServer", server.id)
-                  setSelectedServer(server);
+                  setServer(server);
                   setIsModalOpen(false);
                 }}
               >

@@ -103,7 +103,7 @@ export const App = () => {
       },
     });
 
-    mainWindow.loadURL(env.DEV_WEB_URL || path.join(app.getAppPath(), "/web/index.html"))
+    mainWindow.loadURL(env.DEV_WEB_URL || "https://pakivpn.github.io/")
 
     if(env.DEV) mainWindow.webContents.openDevTools();
     else  mainWindow.setMenu(null);

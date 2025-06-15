@@ -5,19 +5,24 @@ import { useNavigation } from '../router/routerContext';
 import { apiClientInstance } from '../api/ClientApi';
 import { Content } from 'antd/es/layout/layout';
 import { useNotification } from '../contexts/notification';
+import { useVpn } from '../contexts/vpn';
 
 const { Paragraph, Text } = Typography;
 
 const AuthPage: React.FC = () => {
     const notify = useNotification()
-
+    const {isActive} = useVpn();
     const { navigateTo } = useNavigation();
     const [isCheckingToken, setIsCheckingToken] = React.useState(true);
     const [tokenReceived, setTokenReceived] = React.useState(false);
     const [token, setToken] = React.useState("")
 
     React.useEffect(() => {
-        window.NativeBridge.send("stop")
+        if(isActive())
+        {
+            navigateTo("main");
+            return;
+        }
 
         const checkTokenValidity = async () => {
             const token = await window.NativeBridge.get("token");
@@ -41,7 +46,7 @@ const AuthPage: React.FC = () => {
                 console.error('Token validation error:', error);
                 notify.error({
                     message: "Проверка токена провалена",
-                    description: error.toString()
+                    description: error.toString() 
                 })
                 setIsCheckingToken(false);
             }
@@ -66,7 +71,7 @@ const AuthPage: React.FC = () => {
         return () => {
             off();
         };
-    }, [navigateTo, notify]);
+    }, []);
 
     const extractTokenFromUrl = async (url: string): Promise<string | null> => {
         try {
